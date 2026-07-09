@@ -1,0 +1,139 @@
+import java.util.*;
+class Account {
+    String accountNumber;
+    String accountHolderName;
+    double balance;
+
+    Account(String accountNumber, String accountHolderName, double balance) {
+        this.accountNumber = accountNumber;
+        this.accountHolderName = accountHolderName;
+        this.balance = balance;
+    }
+
+    void deposit(double amount) {
+        balance += amount;
+        System.out.println("Successfully deposited. New Balance: " + balance);
+    }
+
+    // To be overridden by subclasses
+    void withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            System.out.println("Withdrawal successful. Remaining Balance: " + balance);
+        } else {
+            System.out.println("Insufficient balance.");
+        }
+    }
+
+    void displayAccountDetails() {
+        System.out.println("Acc No: " + accountNumber + " | Holder: " + accountHolderName + " | Balance: " + balance);
+    }
+}
+
+// Subclass: Savings Account
+class SavingsAccount extends Account {
+    private final double minBalance = 1000.0;
+
+    SavingsAccount(String accNo, String name, double bal) {
+        super(accNo, name, bal);
+    }
+
+    @Override
+    void withdraw(double amount) {
+        if ((balance - amount) >= minBalance) {
+            balance -= amount;
+            System.out.println("Withdrawal successful. Remaining Balance: " + balance);
+        } else {
+            System.out.println("Withdrawal failed! Savings account must maintain a minimum balance of " + minBalance);
+        }
+    }
+}
+
+// Subclass: Current Account
+class CurrentAccount extends Account {
+    private final double overdraftLimit = 5000.0;
+
+    CurrentAccount(String accNo, String name, double bal) {
+        super(accNo, name, bal);
+    }
+
+    @Override
+    void withdraw(double amount) {
+        if (amount <= (balance + overdraftLimit)) {
+            balance -= amount;
+            System.out.println("Withdrawal successful (Overdraft used if balance < 0). Current Balance: " + balance);
+        } else {
+            System.out.println("Withdrawal failed! Exceeds overdraft limit of " + overdraftLimit);
+        }
+    }
+}
+public class BankManagementSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Account[] accounts = new Account[10];
+        int accountCount = 0;
+
+        while (true) {
+            System.out.println("\n--- Bank Management System ---");
+            System.out.println("1. Create Account\n2. Deposit Money\n3. Withdraw Money\n4. Display Account\n5. Exit");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    if (accountCount < 10) {
+                        System.out.print("Enter Account Number: ");
+                        String accNo = sc.next();
+                        System.out.print("Enter Account Holder Name: ");
+                        String name = sc.next();
+                        System.out.print("Enter Initial Balance: ");
+                        double bal = sc.nextDouble();
+                        System.out.print("Type (1 for Savings, 2 for Current): ");
+                        int type = sc.nextInt();
+
+                        if (type == 1) accounts[accountCount++] = new SavingsAccount(accNo, name, bal);
+                        else accounts[accountCount++] = new CurrentAccount(accNo, name, bal);
+                        System.out.println("Account created successfully!");
+                    } else {
+                        System.out.println("Bank database full!");
+                    }
+                    break;
+
+                case 2: // Deposit
+                    System.out.print("Enter Account Number: ");
+                    String dAcc = sc.next();
+                    for(int i=0; i<accountCount; i++) {
+                        if(accounts[i].accountNumber.equals(dAcc)) {
+                            System.out.print("Enter amount to deposit: ");
+                            accounts[i].deposit(sc.nextDouble());
+                        }
+                    }
+                    break;
+
+                case 3: // Withdraw
+                    System.out.print("Enter Account Number: ");
+                    String wAcc = sc.next();
+                    for(int i=0; i<accountCount; i++) {
+                        if(accounts[i].accountNumber.equals(wAcc)) {
+                            System.out.print("Enter amount to withdraw: ");
+                            accounts[i].withdraw(sc.nextDouble());
+                        }
+                    }
+                    break;
+
+                case 4: // Display
+                    for(int i=0; i<accountCount; i++) {
+                        accounts[i].displayAccountDetails();
+                    }
+                    break;
+
+                case 5:
+                    System.out.println("Exiting... Thank you!");
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
+        }
+    }
+}
