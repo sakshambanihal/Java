@@ -1,0 +1,70 @@
+import java.io.*;
+import java.util.Scanner;
+
+class EditCourse {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        File inputFile = new File("courses.txt");
+        File tempFile = new File("temp.txt");
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+
+            System.out.print("Enter Course ID to edit: ");
+            int searchId = sc.nextInt();
+            sc.nextLine();
+
+            String line;
+            boolean found = false;
+
+            while ((line = br.readLine()) != null) {
+                String data[] = line.split(",");
+
+                int id = Integer.parseInt(data[0]);
+
+                if (id == searchId) {
+                    System.out.println("\nEnter new course details:");
+
+                    System.out.print("Enter New Course Name: ");
+                    String newName = sc.nextLine();
+
+                    System.out.print("Enter New Duration (months): ");
+                    int newDuration = sc.nextInt();
+
+                    System.out.print("Enter New Fees: ");
+                    double newFees = sc.nextDouble();
+                    sc.nextLine();
+
+                    // Write updated record
+                    bw.write(id + "," + newName + "," + newDuration + "," + newFees);
+                    found = true;
+                } else {
+                    // Write old record
+                    bw.write(line);
+                }
+                bw.newLine();
+            }
+
+            br.close();
+            bw.close();
+
+            // Replace original file
+            if (inputFile.delete()) {
+                tempFile.renameTo(inputFile);
+            }
+
+            if (found) {
+                System.out.println("\n Course record updated successfully!");
+            } else {
+                System.out.println("\n Course not found.");
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error processing file.");
+        }
+
+        sc.close();
+    }
+}
